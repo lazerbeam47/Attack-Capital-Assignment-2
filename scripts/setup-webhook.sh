@@ -1,0 +1,25 @@
+#!/bin/bash
+# Quick webhook setup helper
+
+echo "🔗 Webhook Setup Helper"
+echo ""
+echo "Option 1: Using ngrok (Recommended for local testing)"
+echo "  1. Install ngrok: https://ngrok.com/download"
+echo "  2. Run: ngrok http 3000"
+echo "  3. Copy the https URL (e.g., https://abc123.ngrok.io)"
+echo "  4. Set Twilio webhook to: https://abc123.ngrok.io/api/webhooks/twilio"
+echo ""
+echo "Option 2: Using Twilio CLI"
+echo "  1. Install: npm install -g twilio-cli"
+echo "  2. Login: twilio login"
+echo "  3. Update webhook:"
+echo "     twilio phone-numbers:update +15177439437 --sms-url http://your-url/api/webhooks/twilio"
+echo ""
+echo "📝 In Twilio Console:"
+echo "  1. Go to: Phone Numbers → Manage → Active Numbers"
+echo "  2. Click: +15177439437"
+echo "  3. Set 'A MESSAGE COMES IN' to your webhook URL"
+echo "  4. Save"
+echo ""
+echo "✅ Once configured, send an SMS to +15177439437 and it will appear in your inbox!"
+

@@ -1,0 +1,252 @@
+// Prisma Schema for Unified Inbox
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// User model (extends Better Auth)
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  role          String    @default("VIEWER") // Role enum: VIEWER, EDITOR, ADMIN
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  teamMemberships   TeamMember[]
+  sentMessages      Message[]          @relation("SentBy")
+  notes             Note[]
+  mentions          NoteMention[]
+  sessions          Session[]
+  accounts          Account[]
+  scheduledMessages ScheduledMessage[]
+
+  @@map("users")
+}
+
+// Role enum converted to String for SQLite compatibility
+
+// Team model for multi-team support
+model Team {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  members TeamMember[]
+  notes   Note[]
+
+  @@map("teams")
+}
+
+// Team membership with roles
+model TeamMember {
+  id     String @id @default(cuid())
+  userId String
+  teamId String
+  role   String @default("VIEWER")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, teamId])
+  @@map("team_members")
+}
+
+// Unified Contact model
+model Contact {
+  id            String   @id @default(cuid())
+  name          String?
+  phone         String?
+  email         String?
+  twitterHandle String?  @map("twitter_handle")
+  facebookId    String?  @map("facebook_id")
+  avatar        String?
+  quickNotes    String?  @map("notes") // Quick notes field
+  tags          String? // Comma-separated tags for SQLite compatibility
+  status        String   @default("LEAD") // ContactStatus: LEAD, CONTACTED, RESPONDED, QUALIFIED, CLOSED
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  messages          Message[]
+  notes             Note[]
+  scheduledMessages ScheduledMessage[]
+
+  @@index([phone])
+  @@index([email])
+  @@map("contacts")
+}
+
+// ContactStatus enum converted to String for SQLite compatibility
+
+// Unified Message model (normalized across channels)
+model Message {
+  id           String    @id @default(cuid())
+  contactId    String
+  userId       String? // null for inbound
+  channel      String    @default("SMS") // Channel: SMS, WHATSAPP, EMAIL, TWITTER, FACEBOOK, SLACK
+  direction    String    @default("OUTBOUND") // Direction: INBOUND, OUTBOUND
+  status       String    @default("PENDING") // MessageStatus: PENDING, SENT, DELIVERED, READ, FAILED, SCHEDULED
+  subject      String?
+  body         String
+  htmlBody     String?   @map("html_body") // Rich text HTML content
+  mediaUrls    String?   @map("media_urls") // JSON string for SQLite compatibility
+  scheduledFor DateTime? @map("scheduled_for")
+  sentAt       DateTime? @map("sent_at")
+  deliveredAt  DateTime? @map("delivered_at")
+  readAt       DateTime? @map("read_at")
+  externalId   String?   @map("external_id") // Channel-specific ID
+  errorMessage String?   @map("error_message")
+  metadata     String? // JSON string for SQLite compatibility
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  // Relations
+  contact Contact @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  sentBy  User?   @relation("SentBy", fields: [userId], references: [id])
+
+  @@index([contactId])
+  @@index([channel, status])
+  @@index([scheduledFor])
+  @@index([externalId])
+  @@map("messages")
+}
+
+// Enums converted to String for SQLite compatibility
+// Channel: SMS, WHATSAPP, EMAIL, TWITTER, FACEBOOK, SLACK
+// Direction: INBOUND, OUTBOUND
+// MessageStatus: PENDING, SENT, DELIVERED, READ, FAILED, SCHEDULED
+
+// Internal Notes for collaboration
+model Note {
+  id        String   @id @default(cuid())
+  contactId String?
+  teamId    String?
+  userId    String
+  title     String?
+  content   String
+  isPrivate Boolean  @default(false) @map("is_private")
+  encrypted Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  contact  Contact?      @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  team     Team?         @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user     User          @relation(fields: [userId], references: [id])
+  mentions NoteMention[]
+
+  @@index([contactId])
+  @@index([teamId])
+  @@map("notes")
+}
+
+// @mentions in notes
+model NoteMention {
+  id     String @id @default(cuid())
+  noteId String
+  userId String
+
+  // Relations
+  note Note @relation(fields: [noteId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([noteId, userId])
+  @@map("note_mentions")
+}
+
+// Better Auth models
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  expiresAt DateTime
+  token     String   @unique
+  ipAddress String?
+  userAgent String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model Account {
+  id           String    @id @default(cuid())
+  userId       String
+  accountId    String
+  providerId   String
+  accessToken  String?
+  refreshToken String?
+  expiresAt    DateTime?
+  password     String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([providerId, accountId])
+  @@map("accounts")
+}
+
+model Verification {
+  id         String   @id @default(cuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+
+  @@unique([identifier, value])
+  @@map("verifications")
+}
+
+// Message Templates for automation
+model MessageTemplate {
+  id          String   @id @default(cuid())
+  name        String
+  body        String
+  htmlBody    String?
+  channel     String // SMS, EMAIL, WHATSAPP
+  triggerType String   @default("TIME_BASED") // TIME_BASED, EVENT_BASED
+  delayDays   Int? // Days to wait for TIME_BASED triggers
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  scheduledMessages ScheduledMessage[]
+
+  @@map("message_templates")
+}
+
+// Scheduled Messages Queue
+model ScheduledMessage {
+  id           String    @id @default(cuid())
+  contactId    String
+  userId       String
+  templateId   String?
+  channel      String // SMS, EMAIL, WHATSAPP
+  body         String
+  htmlBody     String?
+  scheduledFor DateTime
+  status       String    @default("PENDING") // PENDING, SENT, FAILED, CANCELLED
+  sentAt       DateTime?
+  errorMessage String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  // Relations
+  contact  Contact          @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  user     User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  template MessageTemplate? @relation(fields: [templateId], references: [id], onDelete: SetNull)
+
+  @@map("scheduled_messages")
+}

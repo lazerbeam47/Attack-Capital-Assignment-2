@@ -1,0 +1,59 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# local env files
+.env*.local
+.env
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# prisma
+/prisma/migrations
+
+# database files
+*.db
+*.db-journal
+/prisma/*.db
+/prisma/*.db-journal
+dev.db
+
+# Video walkthrough and internal documentation
+3_MIN_WALKTHROUGH_SCRIPT.md
+EXACT_SCRIPT.md
+VIDEO_WALKTHROUGH_SCRIPT.md
+GITHUB_DEPLOYMENT_CHECKLIST.md
+DELIVERABLES_SUMMARY.md
+QUICK_START_DEPLOYMENT.md
+DEPLOYMENT_TRACKER.md
+PHONE_NUMBER_CHANGES.md
+FIX_*.md
+verify-deployment.sh
+
