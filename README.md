@@ -7,9 +7,6 @@
 
 A comprehensive full-stack application for unified communication across SMS, WhatsApp, Email, and Social Media channels. Built with Next.js 14+, TypeScript, Prisma, and Better Auth.
 
-> **🎥 [Watch the Video Walkthrough →](YOUR_VIDEO_LINK_HERE)**  
-> See the platform in action: send cross-channel messages, schedule automations, collaborate on notes, and view analytics (3-5 min demo)
-
 ## 📹 Video Walkthrough
 https://www.loom.com/share/dc5bbc31424943b69775d6286b166d5e
 
