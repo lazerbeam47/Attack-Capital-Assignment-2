@@ -16,8 +16,6 @@ The video demonstrates:
 3. **Team Collaboration**: Create notes with @mentions and collaborate on contact management
 4. **Analytics Dashboard**: View engagement metrics, response rates, and channel performance
 
-*Note: Replace the placeholder link above with your actual video URL after recording.*
-
 ## 📊 Database Schema (ERD)fied Inbox - Multi-Channel Customer Outreach Platform
 
 A comprehensive full-stack application for unified communication across SMS, WhatsApp, Email, and Social Media channels. Built with Next.js 14+, TypeScript, Prisma, and Better Auth.
