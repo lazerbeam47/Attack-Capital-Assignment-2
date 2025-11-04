@@ -11,8 +11,7 @@ A comprehensive full-stack application for unified communication across SMS, Wha
 > See the platform in action: send cross-channel messages, schedule automations, collaborate on notes, and view analytics (3-5 min demo)
 
 ## 📹 Video Walkthrough
-
-**[INSERT YOUR LOOM/YOUTUBE LINK HERE]**
+https://www.loom.com/share/dc5bbc31424943b69775d6286b166d5e
 
 The video demonstrates:
 1. **Cross-Channel Messaging**: Send SMS, WhatsApp, and Email messages from a unified interface
